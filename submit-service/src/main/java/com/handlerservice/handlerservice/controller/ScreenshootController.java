@@ -1,8 +1,10 @@
 package com.handlerservice.handlerservice.controller;
 
+import com.handlerservice.handlerservice.HandlerServiceApplication;
 import com.handlerservice.handlerservice.model.WebSite;
 import com.handlerservice.handlerservice.payload.UploadFileResponse;
 import com.handlerservice.handlerservice.service.FileStorageService;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,7 +22,8 @@ public class ScreenshootController {
 
     @Autowired
     private FileStorageService fileStorageService;
-
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @PostMapping("/uploadFile")
     public UploadFileResponse uploadFile(@RequestParam("file") MultipartFile file) {
@@ -42,7 +45,11 @@ public class ScreenshootController {
     //RABBİTMQ GAZLA
             customer.getUrl()
                     .parallelStream()
-                    .forEach(System.out::println);
+                    .forEach(
+                        url ->
+                            rabbitTemplate.convertAndSend("jsa.direct1", "jsa.routingkey1",url)
+
+                    );
 
             System.out.println(customer);
         } catch (JAXBException e) {
