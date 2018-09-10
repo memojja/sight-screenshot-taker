@@ -36,22 +36,20 @@ public class ScreenshootController {
 
 
         File file1 = new File( "uploads\\" + fileName);
-        JAXBContext jaxbContext = null;
+        JAXBContext jaxbContext;
         try {
             jaxbContext = JAXBContext.newInstance(WebSite.class);
             Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
             WebSite customer = (WebSite) jaxbUnmarshaller.unmarshal(file1);
 
-    //RABBİTMQ GAZLA
             customer.getUrl()
                     .parallelStream()
                     .forEach(
                         url ->
                             rabbitTemplate.convertAndSend("jsa.direct1", "jsa.routingkey1",url)
-
-                    );
-
+                         );
             System.out.println(customer);
+
         } catch (JAXBException e) {
             e.printStackTrace();
         }
